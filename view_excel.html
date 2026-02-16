@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Viewer - Hemnet Listings</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .stats {
+            text-align: right;
+            opacity: 0.9;
+        }
+
+        .btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .table-container {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 12px;
+            text-align: left;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #334155;
+            font-size: 0.9rem;
+        }
+
+        tr:hover td {
+            background: #334155;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #64748b;
+        }
+
+        .error {
+            background: #dc2626;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .pagination-info {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            background: #334155;
+            color: white;
+            border: 1px solid #475569;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            min-width: 44px;
+            text-align: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #475569;
+            border-color: #64748b;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-btn.active {
+            background: #2563eb;
+            border-color: #3b82f6;
+        }
+
+        .page-input {
+            width: 60px;
+            padding: 8px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: white;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .page-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stats {
+                text-align: center;
+                margin-top: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            th, td {
+                padding: 8px 6px;
+                font-size: 0.75rem;
+            }
+
+            .pagination {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .pagination-info {
+                text-align: center;
+                font-size: 0.85rem;
+            }
+
+            .pagination-controls {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .page-btn {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📊 Excel Data Viewer</h1>
+                <p>Hemnet Listings Database</p>
+            </div>
+            <div class="stats">
+                <div id="stats">Loading...</div>
+                <div style="margin-top: 10px;">
+                    <a href="dashboard.html" class="btn">← Back to Dashboard</a>
+                    <a href="hemnet_listings.xlsx" download class="btn">⬇️ Download Excel</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loading" class="loading">
+                Loading Excel data...
+            </div>
+            <div id="error" style="display: none;"></div>
+            <table id="dataTable" style="display: none;">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div id="paginationContainer" class="pagination" style="display: none;">
+            <div class="pagination-info">
+                Showing <strong id="rowsInfo">1-50</strong> of <strong id="totalRows">0</strong> rows
+                | Page <strong id="currentPageDisplay">1</strong> of <strong id="totalPages">1</strong>
+            </div>
+            <div class="pagination-controls">
+                <button class="page-btn" id="firstBtn" onclick="goToPage(1)">⏮️ First</button>
+                <button class="page-btn" id="prevBtn" onclick="previousPage()">◀️ Prev</button>
+                <input type="number" class="page-input" id="pageInput" min="1" value="1"
+                       onchange="goToPage(parseInt(this.value))" />
+                <button class="page-btn" id="nextBtn" onclick="nextPage()">Next ▶️</button>
+                <button class="page-btn" id="lastBtn" onclick="goToLastPage()">Last ⏭️</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Pagination variables
+        let allHeaders = [];
+        let allRows = [];
+        let currentPage = 1;
+        const rowsPerPage = 50;
+
+        // Load and display Excel file
+        async function loadExcel() {
+            try {
+                const response = await fetch('hemnet_listings.xlsx');
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+                // Get first sheet
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+
+                // Convert to JSON
+                const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                if (data.length === 0) {
+                    showError('No data found in Excel file');
+                    return;
+                }
+
+                // First row is headers
+                allHeaders = data[0];
+                allRows = data.slice(1);
+
+                // Update stats
+                document.getElementById('stats').innerHTML = `
+                    Total Records: <strong>${allRows.length.toLocaleString()}</strong><br>
+                    Columns: <strong>${allHeaders.length}</strong>
+                `;
+
+                // Build table headers
+                buildTableHeaders();
+
+                // Show first page
+                renderPage(1);
+
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dataTable').style.display = 'table';
+                document.getElementById('paginationContainer').style.display = 'flex';
+
+            } catch (error) {
+                showError('Error loading Excel file: ' + error.message);
+            }
+        }
+
+        function buildTableHeaders() {
+            const thead = document.getElementById('tableHead');
+            thead.innerHTML = '';
+
+            const headerRow = document.createElement('tr');
+            allHeaders.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header || '';
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+        }
+
+        function renderPage(page) {
+            const totalPages = Math.ceil(allRows.length / rowsPerPage);
+
+            // Validate page number
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            currentPage = page;
+
+            // Calculate row range
+            const startRow = (page - 1) * rowsPerPage;
+            const endRow = Math.min(startRow + rowsPerPage, allRows.length);
+
+            // Clear table body
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            // Build rows for current page
+            for (let i = startRow; i < endRow; i++) {
+                const row = allRows[i];
+                const tr = document.createElement('tr');
+
+                allHeaders.forEach((_, colIndex) => {
+                    const td = document.createElement('td');
+                    const cellValue = row[colIndex];
+                    td.textContent = cellValue !== undefined && cellValue !== null ? cellValue : '';
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            }
+
+            // Update pagination info
+            updatePaginationUI(startRow + 1, endRow, allRows.length, page, totalPages);
+        }
+
+        function updatePaginationUI(startRow, endRow, totalRows, page, totalPages) {
+            document.getElementById('rowsInfo').textContent = `${startRow}-${endRow}`;
+            document.getElementById('totalRows').textContent = totalRows.toLocaleString();
+            document.getElementById('currentPageDisplay').textContent = page;
+            document.getElementById('totalPages').textContent = totalPages;
+            document.getElementById('pageInput').value = page;
+            document.getElementById('pageInput').max = totalPages;
+
+            // Update button states
+            document.getElementById('firstBtn').disabled = page === 1;
+            document.getElementById('prevBtn').disabled = page === 1;
+            document.getElementById('nextBtn').disabled = page === totalPages;
+            document.getElementById('lastBtn').disabled = page === totalPages;
+        }
+
+        function goToPage(page) {
+            renderPage(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextPage() {
+            goToPage(currentPage + 1);
+        }
+
+        function previousPage() {
+            goToPage(currentPage - 1);
+        }
+
+        function goToLastPage() {
+            const totalPages = Math.ceil(allRows.length / rowsPerPage);
+            goToPage(totalPages);
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            const errorDiv = document.getElementById('error');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Load on page load
+        loadExcel();
+    </script>
+</body>
+</html>

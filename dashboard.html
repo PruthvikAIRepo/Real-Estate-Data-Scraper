@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hemnet Market Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+
+        .container {
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(37, 99, 235, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-meta {
+            text-align: right;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .refresh-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Excel Buttons */
+        .excel-btn {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            margin-top: 8px;
+            text-decoration: none;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        .excel-btn:hover {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: rgba(16, 185, 129, 0.6);
+        }
+
+        .download-btn {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        .download-btn:hover {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.6);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .command-box {
+            background: var(--bg-dark);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .modal-btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0 5px;
+        }
+
+        .modal-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .modal-btn.secondary {
+            background: var(--secondary);
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 16px 24px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification-success {
+            border-left-color: var(--success);
+        }
+
+        .notification-error {
+            border-left-color: var(--danger);
+        }
+
+        .notification-info {
+            border-left-color: var(--primary);
+        }
+
+        .notification i {
+            font-size: 1.5rem;
+        }
+
+        .notification-success i {
+            color: var(--success);
+        }
+
+        .notification-error i {
+            color: var(--danger);
+        }
+
+        /* Section Headers */
+        .section-header {
+            margin: 32px 0 16px 0;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-color: var(--primary);
+        }
+
+        .metric-card .label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-card .subtext {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .metric-card.highlight {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none;
+        }
+
+        .metric-card.highlight .label {
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .chart-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-card h3 i {
+            color: var(--primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .chart-container canvas {
+            max-width: 100%;
+            height: auto !important;
+        }
+
+        /* Insights Section */
+        .insights-section {
+            margin-bottom: 24px;
+        }
+
+        .insights-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .insights-section h2 i {
+            color: var(--warning);
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 16px;
+        }
+
+        .insight-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+        }
+
+        .insight-card .category {
+            font-size: 0.75rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .insight-card .title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .insight-card .text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Data Tables */
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .tables-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .table-card {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+
+        /* Mobile scroll hint */
+        @media (max-width: 768px) {
+            .table-card::before {
+                content: '← Swipe to see more →';
+                display: block;
+                text-align: center;
+                font-size: 0.7rem;
+                color: var(--text-secondary);
+                margin-bottom: 8px;
+                opacity: 0.6;
+            }
+        }
+
+        .table-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-card h3 i {
+            color: var(--primary);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px;
+            background: var(--bg-dark);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .data-table tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .data-table .number {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .data-table .highlight-cell {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Recent Listings */
+        .recent-section {
+            margin-bottom: 24px;
+        }
+
+        .recent-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .listings-table {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .listings-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .listings-table th {
+            text-align: left;
+            padding: 14px;
+            background: var(--bg-dark);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .listings-table td {
+            padding: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .listings-table tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-premium {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .badge-plus {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .badge-max {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+
+        .badge-standard {
+            background: var(--bg-dark);
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: var(--text-secondary);
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Auto-refresh indicator */
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--success);
+        }
+
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ========== TABLET RESPONSIVE (768px and below) ========== */
+        @media (max-width: 768px) {
+            /* Header */
+            .header {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-meta {
+                text-align: center;
+                margin-top: 12px;
+                width: 100%;
+            }
+
+            /* Buttons on tablet */
+            .refresh-btn,
+            .excel-btn {
+                margin: 6px 4px;
+                padding: 10px 16px;
+            }
+
+            /* Metrics Grid - 3 columns on tablet */
+            .metrics-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+
+            .metric-card {
+                padding: 16px;
+            }
+
+            .metric-card .value {
+                font-size: 1.5rem;
+            }
+
+            /* Charts Grid - 2 columns on tablet */
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            /* Time series total chart spans both columns */
+            .charts-grid .chart-card:first-child {
+                grid-column: 1 / -1;
+            }
+
+            /* Chart cards */
+            .chart-card {
+                padding: 16px;
+            }
+
+            .chart-card h3 {
+                font-size: 1rem;
+            }
+
+            /* Tables */
+            .table-card {
+                padding: 16px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .data-table,
+            .listings-table table {
+                font-size: 0.85rem;
+                min-width: 600px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 10px 8px;
+            }
+
+            /* Insights */
+            .insights-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .insight-card {
+                padding: 16px;
+            }
+        }
+
+        /* ========== MOBILE RESPONSIVE (480px and below) ========== */
+        @media (max-width: 480px) {
+            /* Container */
+            .container {
+                padding: 12px;
+            }
+
+            /* Header */
+            .header {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+                gap: 8px;
+            }
+
+            .header h1 i {
+                font-size: 1.25rem;
+            }
+
+            .header-meta {
+                font-size: 0.8rem;
+                width: 100%;
+                margin-top: 12px;
+            }
+
+            .refresh-btn,
+            .excel-btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+                margin: 6px 0;
+                margin-left: 0;
+                display: block;
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+            }
+
+            /* Make buttons stack nicely */
+            .header-meta > * {
+                margin-bottom: 8px;
+            }
+
+            /* Section Headers */
+            .section-header h2 {
+                font-size: 1.15rem;
+                gap: 8px;
+            }
+
+            /* Metrics Grid - 2 columns on mobile */
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .metric-card {
+                padding: 12px;
+            }
+
+            .metric-card .label {
+                font-size: 0.7rem;
+            }
+
+            .metric-card .value {
+                font-size: 1.25rem;
+            }
+
+            .metric-card .subtext {
+                font-size: 0.7rem;
+            }
+
+            /* Charts Grid - Single column on mobile */
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                width: 100%;
+            }
+
+            .chart-card {
+                padding: 12px;
+                width: 100%;
+                max-width: 100%;
+                overflow: hidden;
+            }
+
+            .chart-card h3 {
+                font-size: 0.9rem;
+                margin-bottom: 12px;
+            }
+
+            .chart-container {
+                height: 220px !important; /* Smaller charts on mobile */
+                width: 100%;
+                position: relative;
+            }
+
+            .chart-container canvas {
+                width: 100% !important;
+                max-width: 100%;
+            }
+
+            /* Tables - Horizontal scroll */
+            .tables-grid {
+                gap: 16px;
+            }
+
+            .table-card {
+                padding: 12px;
+                overflow-x: auto !important;
+                overflow-y: visible;
+                -webkit-overflow-scrolling: touch;
+                position: relative;
+            }
+
+            .table-card h3 {
+                font-size: 0.9rem;
+                margin-bottom: 10px;
+            }
+
+            /* Make all tables scrollable */
+            .data-table,
+            .listings-table table {
+                font-size: 0.75rem;
+                min-width: 500px; /* Force horizontal scroll */
+                display: table;
+                width: auto;
+            }
+
+            .data-table th,
+            .data-table td,
+            .listings-table table th,
+            .listings-table table td {
+                padding: 8px 6px;
+                white-space: nowrap;
+                font-size: 0.75rem;
+            }
+
+            /* Scroll indicator shadow */
+            .table-card::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 30px;
+                background: linear-gradient(to left, var(--bg-card), transparent);
+                pointer-events: none;
+            }
+
+            /* Insights */
+            .insights-section h2 {
+                font-size: 1.15rem;
+            }
+
+            .insights-grid {
+                gap: 10px;
+            }
+
+            .insight-card {
+                padding: 12px;
+            }
+
+            .insight-card .category {
+                font-size: 0.65rem;
+            }
+
+            .insight-card .title {
+                font-size: 0.85rem;
+            }
+
+            .insight-card .text {
+                font-size: 0.8rem;
+            }
+
+            /* Touch-friendly buttons */
+            button, .refresh-btn, .excel-btn {
+                min-height: 44px; /* Apple's touch target recommendation */
+                min-width: 44px;
+            }
+        }
+
+        /* ========== EXTRA SMALL MOBILE (360px and below) ========== */
+        @media (max-width: 360px) {
+            /* Ultra compact for very small phones */
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-card .value {
+                font-size: 1.5rem;
+            }
+
+            table {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1><i class="fas fa-chart-line"></i> Hemnet Market Dashboard</h1>
+                <p style="opacity: 0.9; margin-top: 8px;">Real-time Swedish Real Estate Analytics</p>
+            </div>
+            <div class="header-meta">
+                <div class="auto-refresh">
+                    <span class="pulse"></span>
+                    Auto-refresh: Every 5 minutes
+                </div>
+                <div id="lastUpdated">Loading...</div>
+                <button class="refresh-btn" onclick="loadData()">
+                    <i class="fas fa-sync-alt"></i> Refresh Now
+                </button>
+                <button class="excel-btn" onclick="runScraper()" style="background: rgba(16, 185, 129, 0.3); border-color: rgba(16, 185, 129, 0.5);" title="Run Scraper Script">
+                    <i class="fas fa-play-circle"></i> Run Scraper
+                </button>
+                <a href="view_excel.html" target="_blank" class="excel-btn" title="View Excel Data in Browser">
+                    <i class="fas fa-table"></i> View Data
+                </a>
+                <a href="hemnet_listings.xlsx" download class="excel-btn download-btn" title="Download Excel File">
+                    <i class="fas fa-download"></i> Download
+                </a>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid" id="metricsGrid">
+            <div class="loading"><i class="fas fa-spinner"></i></div>
+        </div>
+
+        <!-- Time Series Charts -->
+        <div class="section-header">
+            <h2><i class="fas fa-chart-line"></i> Time Series Analysis</h2>
+        </div>
+        <div class="charts-grid">
+            <div class="chart-card" style="grid-column: 1 / -1;">
+                <h3><i class="fas fa-chart-area"></i> Total Listings Over Time</h3>
+                <div class="chart-container">
+                    <canvas id="timeSeriesTotal"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-layer-group"></i> Listing Types Over Time</h3>
+                <div class="chart-container">
+                    <canvas id="timeSeriesTypes"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-award"></i> Listing Labels Share Over Time</h3>
+                <div class="chart-container">
+                    <canvas id="timeSeriesLabels"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Snapshot Charts -->
+        <div class="section-header" style="margin-top: 40px;">
+            <h2><i class="fas fa-chart-pie"></i> Current Snapshot Analysis</h2>
+        </div>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3><i class="fas fa-home"></i> Property Type Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="propertyTypeChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-coins"></i> Price Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="priceDistChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-door-open"></i> Rooms Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="roomsChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-tags"></i> Listing Labels</h3>
+                <div class="chart-container">
+                    <canvas id="labelsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="insights-section">
+            <h2><i class="fas fa-lightbulb"></i> Key Insights</h2>
+            <div class="insights-grid" id="insightsGrid">
+                <div class="loading"><i class="fas fa-spinner"></i></div>
+            </div>
+        </div>
+
+        <!-- Data Tables -->
+        <div class="tables-grid">
+            <div class="table-card">
+                <h3><i class="fas fa-map-marker-alt"></i> Top Locations</h3>
+                <table class="data-table" id="locationsTable">
+                    <thead>
+                        <tr>
+                            <th>Location</th>
+                            <th>Listings</th>
+                            <th>Avg Price</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="table-card">
+                <h3><i class="fas fa-building"></i> Top Brokers</h3>
+                <table class="data-table" id="brokersTable">
+                    <thead>
+                        <tr>
+                            <th>Broker</th>
+                            <th>Listings</th>
+                            <th>Market Share</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Property Type Analysis -->
+        <div class="table-card" style="margin-bottom: 24px;">
+            <h3><i class="fas fa-chart-bar"></i> Property Type Analysis</h3>
+            <table class="data-table" id="propertyAnalysisTable">
+                <thead>
+                    <tr>
+                        <th>Property Type</th>
+                        <th>Count</th>
+                        <th>% Share</th>
+                        <th>Avg Price</th>
+                        <th>Avg Area</th>
+                        <th>Avg Price/m²</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Features Analysis -->
+        <div class="chart-card" style="margin-bottom: 24px;">
+            <h3><i class="fas fa-star"></i> Top Features</h3>
+            <div class="chart-container" style="height: 350px;">
+                <canvas id="featuresChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Listings -->
+        <div class="recent-section">
+            <h2><i class="fas fa-clock"></i> Recent Listings</h2>
+            <div class="listings-table">
+                <table id="recentTable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Location</th>
+                            <th>Type</th>
+                            <th>Rooms</th>
+                            <th>Area</th>
+                            <th>Price</th>
+                            <th>Label</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Data sourced from Hemnet.se | Dashboard auto-refreshes every 5 minutes</p>
+            <p>Generated by Hemnet Scraper Analytics System</p>
+        </div>
+    </div>
+
+    <script>
+        // Chart instances
+        let propertyTypeChart, priceDistChart, roomsChart, labelsChart, featuresChart;
+
+        // Color palette
+        const colors = [
+            '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+            '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1',
+            '#14b8a6', '#a855f7'
+        ];
+
+        // Format currency
+        function formatCurrency(value) {
+            if (value >= 1000000) {
+                return (value / 1000000).toFixed(1) + 'M kr';
+            }
+            return value.toLocaleString('sv-SE') + ' kr';
+        }
+
+        // Open Excel file
+        function openExcel() {
+            // Get the full path to Excel file
+            const excelPath = window.location.origin + window.location.pathname.replace('dashboard.html', 'hemnet_listings.xlsx');
+
+            // Open in new window - browser/OS will handle it
+            const win = window.open(excelPath, '_blank');
+
+            // If popup blocked, provide fallback
+            if (!win || win.closed || typeof win.closed === 'undefined') {
+                // Fallback: create hidden link and click
+                const link = document.createElement('a');
+                link.href = 'hemnet_listings.xlsx';
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        // Load data from JSON
+        async function loadData() {
+            try {
+                const response = await fetch('dashboard_data.json?' + Date.now());
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        // Update all dashboard components
+        function updateDashboard(data) {
+            updateMetrics(data.key_metrics);
+
+            // Time Series Charts
+            if (data.time_series) {
+                updateTimeSeriesTotal(data.time_series);
+                updateTimeSeriesTypes(data.time_series);
+                updateTimeSeriesLabels(data.time_series);
+            }
+
+            // Snapshot Charts
+            updatePropertyTypeChart(data.property_types);
+            updatePriceDistChart(data.price_distribution);
+            updateRoomsChart(data.rooms_distribution);
+            updateLabelsChart(data.listing_labels);
+            updateFeaturesChart(data.features);
+            updateInsights(data.insights);
+            updateLocationsTable(data.locations);
+            updateBrokersTable(data.brokers);
+            updatePropertyAnalysisTable(data.property_types);
+            updateRecentListings(data.recent_listings);
+
+            // Update timestamp
+            const date = new Date(data.generated_at);
+            document.getElementById('lastUpdated').textContent =
+                'Last updated: ' + date.toLocaleString('sv-SE');
+        }
+
+        // Update metrics cards
+        function updateMetrics(metrics) {
+            const grid = document.getElementById('metricsGrid');
+            grid.innerHTML = `
+                <div class="metric-card highlight">
+                    <div class="label">Total Listings</div>
+                    <div class="value">${metrics.total_listings.toLocaleString()}</div>
+                    <div class="subtext">Active properties</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Average Price</div>
+                    <div class="value">${formatCurrency(metrics.avg_price)}</div>
+                    <div class="subtext">Mean listing price</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Median Price</div>
+                    <div class="value">${formatCurrency(metrics.median_price)}</div>
+                    <div class="subtext">Middle value</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Price Range</div>
+                    <div class="value">${formatCurrency(metrics.min_price)} - ${formatCurrency(metrics.max_price)}</div>
+                    <div class="subtext">Min to Max</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Average Area</div>
+                    <div class="value">${metrics.avg_area} m²</div>
+                    <div class="subtext">Mean living space</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Price per m²</div>
+                    <div class="value">${metrics.avg_price_per_m2.toLocaleString('sv-SE')} kr</div>
+                    <div class="subtext">Average rate</div>
+                </div>
+            `;
+        }
+
+        // ========== TIME SERIES CHARTS ==========
+
+        // Total Listings Over Time - Line Chart
+        function updateTimeSeriesTotal(tsData) {
+            const ctx = document.getElementById('timeSeriesTotal').getContext('2d');
+
+            if (window.timeSeriesTotal && typeof window.timeSeriesTotal.destroy === 'function') {
+                window.timeSeriesTotal.destroy();
+            }
+
+            window.timeSeriesTotal = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: tsData.dates,
+                    datasets: [{
+                        label: 'Total Listings',
+                        data: tsData.total_listings,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { color: '#94a3b8' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toLocaleString()} listings`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Listing Types Over Time - Stacked Area Chart
+        function updateTimeSeriesTypes(tsData) {
+            const ctx = document.getElementById('timeSeriesTypes').getContext('2d');
+
+            if (window.timeSeriesTypes && typeof window.timeSeriesTypes.destroy === 'function') {
+                window.timeSeriesTypes.destroy();
+            }
+
+            window.timeSeriesTypes = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: tsData.dates,
+                    datasets: [
+                        {
+                            label: 'Bostad',
+                            data: tsData.listing_types.Bostad,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'New Construction',
+                            data: tsData.listing_types['New Construction'],
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { color: '#94a3b8' } }
+                    },
+                    scales: {
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Listing Labels Share Over Time - Line Chart with Percentages
+        function updateTimeSeriesLabels(tsData) {
+            const ctx = document.getElementById('timeSeriesLabels').getContext('2d');
+
+            if (window.timeSeriesLabels && typeof window.timeSeriesLabels.destroy === 'function') {
+                window.timeSeriesLabels.destroy();
+            }
+
+            window.timeSeriesLabels = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: tsData.dates,
+                    datasets: [
+                        {
+                            label: 'Premium',
+                            data: tsData.listing_labels_pct.Premium,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5
+                        },
+                        {
+                            label: 'Plus',
+                            data: tsData.listing_labels_pct.Plus,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5
+                        },
+                        {
+                            label: 'Max',
+                            data: tsData.listing_labels_pct.Max,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5
+                        },
+                        {
+                            label: 'Standard',
+                            data: tsData.listing_labels_pct.Standard,
+                            borderColor: '#6b7280',
+                            backgroundColor: 'rgba(107, 114, 128, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, labels: { color: '#94a3b8' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ========== SNAPSHOT CHARTS ==========
+
+        // Property Type Pie Chart
+        function updatePropertyTypeChart(data) {
+            const ctx = document.getElementById('propertyTypeChart').getContext('2d');
+
+            if (propertyTypeChart) propertyTypeChart.destroy();
+
+            propertyTypeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        data: data.map(d => d.count),
+                        backgroundColor: colors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: '#94a3b8', padding: 15 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Price Distribution Bar Chart
+        function updatePriceDistChart(data) {
+            const ctx = document.getElementById('priceDistChart').getContext('2d');
+
+            if (priceDistChart) priceDistChart.destroy();
+
+            priceDistChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.range),
+                    datasets: [{
+                        label: 'Listings',
+                        data: data.map(d => d.count),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Rooms Distribution Chart
+        function updateRoomsChart(data) {
+            const ctx = document.getElementById('roomsChart').getContext('2d');
+
+            if (roomsChart) roomsChart.destroy();
+
+            roomsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: 'Listings',
+                        data: data.map(d => d.count),
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Labels Pie Chart
+        function updateLabelsChart(data) {
+            const ctx = document.getElementById('labelsChart').getContext('2d');
+
+            if (labelsChart) labelsChart.destroy();
+
+            const labelColors = {
+                'Premium': '#f59e0b',
+                'Plus': '#10b981',
+                'Max': '#8b5cf6',
+                'Standard': '#64748b'
+            };
+
+            labelsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        data: data.map(d => d.count),
+                        backgroundColor: data.map(d => labelColors[d.name] || '#64748b'),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: '#94a3b8', padding: 15 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Features Horizontal Bar Chart
+        function updateFeaturesChart(data) {
+            const ctx = document.getElementById('featuresChart').getContext('2d');
+
+            if (featuresChart) featuresChart.destroy();
+
+            featuresChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: 'Listings with feature',
+                        data: data.map(d => d.count),
+                        backgroundColor: colors,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update insights
+        function updateInsights(insights) {
+            const grid = document.getElementById('insightsGrid');
+            grid.innerHTML = insights.map(insight => `
+                <div class="insight-card">
+                    <div class="category">${insight.category}</div>
+                    <div class="title">${insight.title}</div>
+                    <div class="text">${insight.text}</div>
+                </div>
+            `).join('');
+        }
+
+        // Update locations table
+        function updateLocationsTable(locations) {
+            const tbody = document.querySelector('#locationsTable tbody');
+            tbody.innerHTML = locations.slice(0, 10).map(loc => `
+                <tr>
+                    <td>${loc.name}</td>
+                    <td class="number">${loc.count}</td>
+                    <td class="number highlight-cell">${formatCurrency(loc.avg_price)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update brokers table
+        function updateBrokersTable(brokers) {
+            const tbody = document.querySelector('#brokersTable tbody');
+            tbody.innerHTML = brokers.slice(0, 10).map(broker => `
+                <tr>
+                    <td>${broker.name}</td>
+                    <td class="number">${broker.count}</td>
+                    <td class="number highlight-cell">${broker.market_share}%</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update property analysis table
+        function updatePropertyAnalysisTable(data) {
+            const tbody = document.querySelector('#propertyAnalysisTable tbody');
+            tbody.innerHTML = data.map(pt => `
+                <tr>
+                    <td><strong>${pt.name}</strong></td>
+                    <td class="number">${pt.count}</td>
+                    <td class="number">${pt.percentage}%</td>
+                    <td class="number highlight-cell">${formatCurrency(pt.avg_price)}</td>
+                    <td class="number">${pt.avg_area} m²</td>
+                    <td class="number">${pt.avg_price_m2.toLocaleString('sv-SE')} kr</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update recent listings
+        function updateRecentListings(listings) {
+            const tbody = document.querySelector('#recentTable tbody');
+
+            const getBadgeClass = (label) => {
+                const classes = {
+                    'Premium': 'badge-premium',
+                    'Plus': 'badge-plus',
+                    'Max': 'badge-max'
+                };
+                return classes[label] || 'badge-standard';
+            };
+
+            tbody.innerHTML = listings.map(listing => `
+                <tr>
+                    <td><strong>${listing.title || 'N/A'}</strong></td>
+                    <td>${listing.location || 'N/A'}</td>
+                    <td>${listing.property_type || 'N/A'}</td>
+                    <td>${listing.rooms || 'N/A'}</td>
+                    <td>${listing.area || 'N/A'}</td>
+                    <td class="highlight-cell">${listing.price || 'N/A'}</td>
+                    <td><span class="badge ${getBadgeClass(listing.listing_label)}">${listing.listing_label}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Initial load
+        loadData();
+
+        // Auto-refresh every 5 minutes
+        setInterval(loadData, 300000);
+
+        // Scraper API Functions
+        let statusCheckInterval = null;
+
+        async function runScraper() {
+            try {
+                // Show loading
+                const btn = document.querySelector('button[onclick="runScraper()"]');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting...';
+                btn.disabled = true;
+
+                // Call API to start scraper
+                const response = await fetch('/api/run-scraper', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> Running...';
+                    showNotification('Scraper started! This will take ~5 minutes.', 'success');
+
+                    // Start checking status every 5 seconds
+                    startStatusCheck();
+                } else {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                    showNotification(data.message, 'error');
+                }
+
+            } catch (error) {
+                console.error('Error starting scraper:', error);
+                const btn = document.querySelector('button[onclick="runScraper()"]');
+                btn.innerHTML = '<i class="fas fa-play-circle"></i> Run Scraper';
+                btn.disabled = false;
+                showNotification('Error: Could not connect to server', 'error');
+            }
+        }
+
+        function startStatusCheck() {
+            // Check status every 5 seconds
+            statusCheckInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/scraper-status');
+                    const status = await response.json();
+
+                    const btn = document.querySelector('button[onclick="runScraper()"]');
+
+                    if (status.running) {
+                        const progress = status.progress || 0;
+                        const total = status.total_pages || 51;
+                        btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Page ${progress}/${total}`;
+                    } else {
+                        // Scraper finished
+                        clearInterval(statusCheckInterval);
+                        btn.innerHTML = '<i class="fas fa-play-circle"></i> Run Scraper';
+                        btn.disabled = false;
+
+                        if (status.last_run === 'Success') {
+                            showNotification('Scraper completed! Refreshing data...', 'success');
+                            // Reload dashboard data
+                            setTimeout(() => loadData(), 1000);
+                        } else {
+                            showNotification('Scraper failed: ' + status.message, 'error');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking status:', error);
+                }
+            }, 5000);
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+
+            document.body.appendChild(notification);
+
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+    </script>
+
+    <!-- Scraper Modal -->
+    <div id="scraperModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-play-circle"></i> Run Scraper</h2>
+                <button class="close-btn" onclick="closeScraperModal()">&times;</button>
+            </div>
+
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">
+                Run the scraper to collect new listings from Hemnet.se
+            </p>
+
+            <div style="background: var(--bg-dark); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <p style="margin-bottom: 10px;"><strong>Option 1: Run from Terminal</strong></p>
+                <div class="command-box">
+                    <code id="scraperCommand">env/Scripts/python beautifulsoup.py</code>
+                    <button class="copy-btn" onclick="copyCommand()">Copy</button>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;">
+                    Open a new terminal in the project folder and paste this command
+                </p>
+            </div>
+
+            <div style="background: var(--bg-dark); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <p style="margin-bottom: 10px;"><strong>Option 2: Double-click Batch File</strong></p>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                    Run <code style="color: var(--primary);">run_scraper.bat</code> from your project folder
+                </p>
+            </div>
+
+            <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid #10b981; margin: 15px 0;">
+                <p style="font-size: 0.9rem; margin: 0;">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Note:</strong> The scraper will take ~5 minutes to scrape 51 pages (~2,550 listings)
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="modal-btn" onclick="closeScraperModal()">Close</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
