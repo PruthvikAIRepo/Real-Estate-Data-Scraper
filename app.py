@@ -42,7 +42,20 @@ def run_scraper_background():
         logger.info("Starting scraper...")
 
         # Determine Python executable
-        python_exe = sys.executable
+        # On PythonAnywhere, sys.executable points to uwsgi, not python
+        # So we need to find the correct python interpreter
+        if 'uwsgi' in sys.executable.lower():
+            # PythonAnywhere environment - use virtual env python
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            python_exe = os.path.join(base_dir, 'env', 'bin', 'python')
+            if not os.path.exists(python_exe):
+                # Fallback to system python3
+                python_exe = 'python3'
+        else:
+            # Local development - use current python
+            python_exe = sys.executable
+
+        logger.info(f"Using Python: {python_exe}")
 
         # Set environment to force unbuffered output
         env = os.environ.copy()
