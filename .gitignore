@@ -29,6 +29,6 @@ temp_*.txt
 *.tmp
 
 # MCP/Development tools
-.serena/
 .playwright-mcp/
 .claude/
+.idea/

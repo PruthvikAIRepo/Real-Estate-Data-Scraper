@@ -26,7 +26,8 @@ scraper_status = {
     'last_run_time': None,
     'message': 'Ready to scrape',
     'progress': 0,
-    'total_pages': 51,
+    'total_pages': 900,
+    'current_municipality': '',
     'listings_added': 0
 }
 
@@ -86,15 +87,25 @@ def run_scraper_background():
                 logger.info(f"Scraper output: {line}")
 
                 # Update progress based on output
-                if "Page" in line and ":" in line:
+                if line.startswith("Municipality "):
                     try:
-                        # Extract page number from output like "Page 11: New: 0, Duplicates: 50"
+                        # e.g. "Municipality 12/290: Göteborgs kommun (1722 listings, 35 pages)"
+                        parts = line.split(":")
+                        m_progress = parts[0].replace("Municipality ", "").strip()
+                        m_name = parts[1].strip().split("(")[0].strip()
+                        current, total = m_progress.split("/")
+                        scraper_status['current_municipality'] = m_name
+                        scraper_status['message'] = f'Scraping {m_name} ({current}/{total} municipalities)...'
+                    except Exception as e:
+                        logger.debug(f"Could not parse municipality line: {e}")
+                elif "Page" in line and ":" in line:
+                    try:
+                        # e.g. "Page 42: New: 30, Duplicates: 20"
                         parts = line.split()
                         for i, part in enumerate(parts):
                             if part == "Page" and i + 1 < len(parts):
                                 page_num = int(parts[i + 1].rstrip(':'))
                                 scraper_status['progress'] = page_num
-                                scraper_status['message'] = f'Scraping page {page_num}...'
                                 break
                     except Exception as e:
                         logger.debug(f"Could not parse page number: {e}")

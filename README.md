@@ -1,6 +1,6 @@
-# 🏠 Hemnet Real Estate Scraper
+# Hemnet Real Estate Scraper
 
-A production-ready Flask web scraper for **Hemnet.se** (Sweden's leading real estate platform) with a real-time dashboard, analytics, and mobile-responsive UI.
+A production-ready Flask web scraper for **Hemnet.se** (Sweden's leading real estate platform) that scrapes **all ~41,000+ listings** across all 290 Swedish municipalities, with a real-time dashboard, analytics, and mobile-responsive UI.
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/Flask-3.0.0-green.svg)](https://flask.palletsprojects.com/)
@@ -8,70 +8,101 @@ A production-ready Flask web scraper for **Hemnet.se** (Sweden's leading real es
 
 ---
 
-## 📋 Features
+## How It Bypasses Hemnet's 2,500 Listing Cap
 
-### 🔥 Core Features
-- **Automated Web Scraping** - Scrapes up to 2,550+ listings (51 pages × 50 listings)
-- **Duplicate Detection** - Smart deduplication prevents duplicate entries
-- **Real-time Progress Tracking** - Live updates during scraping with progress bar
-- **Background Execution** - Non-blocking scraper runs via Flask backend
-- **Excel Export** - Formatted `.xlsx` files with auto-styled headers
+Hemnet limits all-Sweden searches to **50 pages × 50 listings = 2,500 listings** maximum, even though ~41,000+ exist. This scraper bypasses that limit by searching **municipality by municipality**.
 
-### 📊 Dashboard & Analytics
-- **Mobile-Responsive Design** - Perfect on desktop, tablet, and mobile
-- **Time Series Visualization** - Track listings growth over time
-- **Interactive Charts** - Chart.js powered analytics (pie, bar, line charts)
-- **In-Browser Excel Viewer** - View data without downloading Excel
-- **Auto-Refresh** - Dashboard updates every 5 minutes
-- **Real-time Notifications** - Success/error alerts with toast messages
+```
+All Sweden search  →  totalViewable: 2,500  (hard cap, useless)
+Stockholm search   →  totalViewable: 2,140  (no cap, full access)
+Göteborg search    →  totalViewable: 1,722  (no cap, full access)
+...290 municipalities × no cap = all 41,000+ listings
+```
 
-### 🎯 Data Collected
-- Property details (title, location, price, area, rooms)
-- Listing metadata (type, label, broker info)
+No Swedish municipality exceeds 2,500 listings, so each municipality search returns all its listings with no cap applied.
+
+---
+
+## Features
+
+### Core
+- **Full Market Coverage** — Scrapes all ~41,000+ listings across all 290 Swedish municipalities
+- **Live Page Count** — Queries Hemnet's GraphQL API at runtime to get the current listing count per municipality before scraping
+- **Duplicate Detection** — O(1) set-based deduplication across the entire run (catches duplicates within and across municipalities)
+- **Crash-Safe Checkpoints** — Saves Excel after every municipality so a crash never loses progress
+- **Background Execution** — Scraper runs in a Flask background thread, non-blocking
+- **Excel Export** — Formatted `.xlsx` with auto-styled headers
+
+### Dashboard & Analytics
+- **Real-time Progress** — Shows live page number + current municipality being scraped
+- **Auto-Resume on Refresh** — Dashboard reconnects to a running scraper after page refresh
+- **Live Dashboard Updates** — `dashboard_data.json` regenerated after every municipality so metrics update during scraping
+- **Time Series Charts** — Track listings growth over time
+- **Interactive Charts** — Chart.js powered analytics (pie, bar, line charts)
+- **In-Browser Excel Viewer** — View data without downloading
+- **Auto-Refresh** — Dashboard updates every 5 minutes
+
+### Data Collected
+- Property details (title, location, price, area, rooms, plot size)
+- Listing metadata (type, label, broker name, broker logo)
 - Images (up to 5 per listing)
 - Tags and features (balcony, patio, etc.)
 - Timestamps for time series analysis
 
 ---
 
-## 🖼️ Screenshots
+## Architecture
 
-### Dashboard Overview
-![Dashboard](https://via.placeholder.com/800x400?text=Dashboard+Screenshot)
-
-### Mobile View
-![Mobile](https://via.placeholder.com/400x800?text=Mobile+View)
-
-### Excel Viewer
-![Excel Viewer](https://via.placeholder.com/800x400?text=Excel+Viewer)
+```
+municipalities.json          ← 290 Swedish municipality IDs (static, permanent)
+        │
+        ▼
+beautifulsoup.py → scrape_hemnet()
+        │
+        ├─ Load municipalities.json (290 entries)
+        ├─ Load existing Excel → build existing_ids set (O(1) dedup)
+        │
+        └─ For each of 290 municipalities:
+               │
+               ├─ get_live_count(id)        → POST GraphQL → returns live total
+               ├─ pages = ceil(total / 50)  → calculated dynamically
+               │
+               ├─ For each page:
+               │       fetch_page(?location_ids[]=ID&page=N)
+               │       extract_listings(html, existing_ids)
+               │       print("Page X: New: Y, Duplicates: Z")  ← Flask reads this
+               │
+               └─ Checkpoint:
+                       save_to_excel()             ← crash-safe
+                       generate_dashboard_data()   ← JSON updated live
+```
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 **Backend:**
 - Python 3.10+
-- Flask 3.0.0 (Web framework)
+- Flask 3.0.0
 - BeautifulSoup4 (HTML parsing)
-- cloudscraper (Anti-bot bypass)
+- cloudscraper (anti-bot bypass + GraphQL requests)
 - openpyxl (Excel generation)
 
 **Frontend:**
 - HTML5, CSS3, JavaScript
-- Chart.js (Data visualization)
-- SheetJS (Client-side Excel parsing)
+- Chart.js (data visualization)
+- SheetJS (client-side Excel parsing)
 
 **Deployment:**
 - PythonAnywhere compatible
-- Git-based deployment
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 - Python 3.10 or higher
-- pip (Python package manager)
+- pip
 - Git
 
 ### Local Setup
@@ -110,116 +141,83 @@ http://localhost:5000
 
 ---
 
-## 🚀 Usage
+## Usage
 
-### Running the Scraper
+### Via Dashboard (Recommended)
+1. Open `http://localhost:5000`
+2. Click **"Run Scraper"**
+3. Watch live progress — button shows `Page 47 — Göteborgs kommun`
+4. Dashboard metrics update automatically after each municipality
+5. Full scrape takes **4–6 hours** for all 290 municipalities (~41,000 listings)
 
-**Option 1: Via Dashboard (Recommended)**
-1. Open http://localhost:5000 in your browser
-2. Click the **"Run Scraper"** button
-3. Watch real-time progress (0/51 → 51/51)
-4. Wait ~5 minutes for completion
-5. View results in dashboard or download Excel
-
-**Option 2: Command Line**
+### Command Line
 ```bash
 python beautifulsoup.py
 ```
 
-### Configuration
+### Quick Test (2–3 municipalities only)
+Edit `municipalities.json` temporarily to test with a small subset:
+```json
+[
+  {"id": "18031", "name": "Stockholms kommun"},
+  {"id": "17920", "name": "Göteborgs kommun"}
+]
+```
+Run, verify Excel and dashboard work, then restore the full file.
+
+---
+
+## Configuration
 
 Edit `beautifulsoup.py` to customize:
 
 ```python
-MAX_PAGES = 51          # Number of pages to scrape (max 51)
 MIN_DELAY = 2           # Minimum delay between requests (seconds)
 MAX_DELAY = 4           # Maximum delay between requests (seconds)
 REQUEST_TIMEOUT = 30    # Request timeout (seconds)
+EXCEL_FILE = "hemnet_listings.xlsx"
 ```
 
-### Generated Files
+---
 
-- **`hemnet_listings.xlsx`** - Main data file with all listings
-- **`dashboard_data.json`** - Analytics data for dashboard
-- **`scraper.log`** - Detailed scraping logs
+## Generated Files
+
+| File | Description |
+|------|-------------|
+| `hemnet_listings.xlsx` | All scraped listings with formatted headers |
+| `dashboard_data.json` | Analytics data regenerated after each municipality |
+| `scraper.log` | Detailed per-page logs |
+
+These files are excluded from git (see `.gitignore`) as they contain generated data.
 
 ---
 
-## 📊 Dashboard Features
-
-### Metrics Display
-- Total listings count
-- New vs existing listings
-- Listing type distribution (Bostad, Nybyggnadsprojekt)
-- Premium/Plus/Max/Standard label breakdown
-
-### Charts
-1. **Time Series Total** - Listings growth over time
-2. **Time Series Types** - Listing type trends
-3. **Listing Type Distribution** - Pie chart
-4. **Listing Label Distribution** - Pie chart
-5. **Top 10 Locations** - Bar chart
-
-### Actions
-- **Refresh Data** - Reload dashboard analytics
-- **Run Scraper** - Start new scraping session
-- **View Excel** - Open in-browser Excel viewer
-- **Download Excel** - Download `.xlsx` file
-
----
-
-## 🌐 Deployment
-
-### PythonAnywhere Deployment
-
-Follow the comprehensive guide in **[DEPLOY_PYTHONANYWHERE.md](DEPLOY_PYTHONANYWHERE.md)**
-
-**Quick steps:**
-1. Create PythonAnywhere account (free tier available)
-2. Clone repository via Bash console
-3. Set up virtual environment
-4. Configure Flask web app
-5. Update WSGI configuration
-6. Go live at `yourusername.pythonanywhere.com`
-
-### Deployment Checklist
-- [ ] Python 3.10 virtual environment created
-- [ ] Dependencies installed (`pip install -r requirements.txt`)
-- [ ] WSGI file configured for Flask
-- [ ] Static files mapped correctly
-- [ ] Web app reloaded
-- [ ] Dashboard accessible at public URL
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 Real-Estate-Data-Scraper/
-├── app.py                      # Flask backend server
-├── beautifulsoup.py            # Main scraper with duplicate detection
-├── generate_dashboard_data.py  # Analytics data generator
+├── app.py                      # Flask backend — scraper API + status tracking
+├── beautifulsoup.py            # Main scraper — municipality loop + deduplication
+├── generate_dashboard_data.py  # Analytics generator — reads Excel, writes JSON
+├── municipalities.json         # 290 Swedish municipality IDs (permanent, static)
 ├── dashboard.html              # Main dashboard UI
-├── view_excel.html             # Excel viewer page
+├── view_excel.html             # In-browser Excel viewer
 ├── requirements.txt            # Python dependencies
-├── DEPLOY_PYTHONANYWHERE.md    # Deployment guide
-├── README.md                   # This file
-├── .gitignore                  # Git exclusions
-├── hemnet_listings.xlsx        # Generated Excel data
-└── dashboard_data.json         # Generated analytics
+├── DEPLOY_PYTHONANYWHERE.md    # PythonAnywhere deployment guide
+└── README.md
 ```
 
 ---
 
-## 🔧 API Endpoints
+## API Endpoints
 
 ### `GET /`
-Returns the main dashboard HTML
+Returns the main dashboard HTML.
 
 ### `POST /api/run-scraper`
-Starts the scraper in background
+Starts the scraper in a background thread.
 ```json
-Response: {
+{
   "success": true,
   "message": "Scraper started successfully",
   "status": { ... }
@@ -227,113 +225,125 @@ Response: {
 ```
 
 ### `GET /api/scraper-status`
-Returns current scraper status
+Returns current scraper status including live progress.
 ```json
-Response: {
-  "running": false,
-  "progress": 51,
-  "total_pages": 51,
-  "message": "Scraper completed successfully!",
-  "last_run": "Success",
-  "last_run_time": "2026-02-17T04:20:00"
+{
+  "running": true,
+  "progress": 47,
+  "current_municipality": "Göteborgs kommun",
+  "message": "Scraping Göteborgs kommun (7/290 municipalities)...",
+  "last_run": null,
+  "last_run_time": null
 }
 ```
 
 ### `GET /api/health`
-Health check endpoint
+Health check.
 ```json
-Response: {
+{
   "status": "healthy",
-  "timestamp": "2026-02-17T04:20:00"
+  "timestamp": "2026-02-20T12:00:00"
 }
 ```
 
 ---
 
-## ⚙️ Configuration
+## Dashboard Features
 
-### Environment Variables (Optional)
+### Live Progress (During Scraping)
+- Button shows: `Page 47 — Göteborgs kommun`
+- Auto-resumes live tracking after page refresh
+- Dashboard metrics update after each municipality completes
 
-Create a `.env` file:
-```env
-MAX_PAGES=51
-MIN_DELAY=2
-MAX_DELAY=4
-FLASK_DEBUG=False
+### Analytics
+- Total listings count, average/median price, price per m²
+- Time series — listings growth over scraping sessions
+- Property type distribution (pie chart)
+- Price distribution (bar chart)
+- Rooms distribution
+- Top 10 locations by listing count
+- Top 10 brokers by market share
+- Features analysis (balcony, patio, etc.)
+
+---
+
+## Performance
+
+| Metric | Value |
+|--------|-------|
+| Total listings scraped | ~41,000+ |
+| Municipalities covered | 290 |
+| Scraping time | ~4–6 hours |
+| Request delay | 2–4s (polite rate limiting) |
+| Deduplication | O(1) set lookup |
+| Checkpoint frequency | After every municipality |
+| Memory usage | ~300MB during scraping |
+
+---
+
+## Deployment
+
+### PythonAnywhere
+Follow the guide in **[DEPLOY_PYTHONANYWHERE.md](DEPLOY_PYTHONANYWHERE.md)**
+
+**Quick steps:**
+1. Create PythonAnywhere account (free tier available)
+2. Clone repository via Bash console
+3. Set up virtual environment and install dependencies
+4. Configure Flask web app and WSGI file
+5. Go live at `yourusername.pythonanywhere.com`
+
+---
+
+## Troubleshooting
+
+**Scraper stuck at a municipality**
+Check `scraper.log`. Usually a network timeout. Re-run — deduplication skips already-scraped listings automatically.
+
+**Dashboard shows stale count**
+Click **"Refresh Now"** button. JSON updates after each municipality, not every page.
+
+**Button resets after page refresh**
+Fixed in current version — dashboard auto-detects a running scraper and resumes live tracking.
+
+**Excel file not found**
+Run the scraper at least once to generate `hemnet_listings.xlsx`.
+
+**No listings found on a page**
+Hemnet may have changed their HTML structure. Check CSS selectors in `extract_listings()` in `beautifulsoup.py`.
+
+---
+
+## municipalities.json
+
+Contains all 290 Swedish municipalities with their Hemnet internal IDs. This file is **permanent** — Swedish municipalities are fixed by law and their Hemnet IDs never change. It never needs to be updated.
+
+```json
+[
+  {"id": "18031", "name": "Stockholms kommun"},
+  {"id": "17920", "name": "Göteborgs kommun"},
+  {"id": "17989", "name": "Malmö kommun"},
+  ...
+]
 ```
 
-### Logging
-
-Logs are written to `scraper.log` with format:
-```
-2026-02-17 04:20:00 - INFO - Page 1: New: 50, Duplicates: 0
-```
+These are **municipality (Kommun)** level IDs — Sweden's middle administrative level (below County/Län, above District/Område). Chosen because:
+- Fixed count: exactly 290
+- No municipality exceeds 2,500 listings (bypasses Hemnet cap)
+- Complete coverage: all listings in Sweden belong to exactly one municipality
 
 ---
 
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Issue:** Scraper stuck at page X
-- **Solution:** Check `scraper.log` for errors. May be network timeout or rate limiting.
-
-**Issue:** Dashboard not loading
-- **Solution:** Ensure Flask server is running (`python app.py`)
-
-**Issue:** No new listings found
-- **Solution:** Normal behavior if all listings already scraped. Run again later for new data.
-
-**Issue:** Excel file not found
-- **Solution:** Run scraper at least once to generate `hemnet_listings.xlsx`
-
-### Debug Mode
-
-Enable Flask debug mode for development:
-```python
-app.run(debug=True)
-```
-
----
-
-## 📈 Performance
-
-- **Scraping Speed:** ~5 minutes for 51 pages (2,550 listings)
-- **Memory Usage:** ~200MB during scraping
-- **Storage:** ~5MB per 2,500 listings (Excel + JSON)
-- **Dashboard Load:** <2 seconds with 10,000+ listings
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## ⚠️ Disclaimer
+## Disclaimer
 
 This scraper is for **educational purposes only**. Please:
 - Review Hemnet.se's Terms of Service before use
-- Implement rate limiting (built-in: 2-4 second delays)
-- Use responsibly and ethically
-- Do not overload their servers
+- Use built-in rate limiting (2–4 second delays between requests)
+- Use responsibly and do not overload their servers
 
 ---
 
-## 👤 Author
+## Author
 
 **Pruthvik**
 - GitHub: [@PruthvikAIRepo](https://github.com/PruthvikAIRepo)
@@ -341,43 +351,10 @@ This scraper is for **educational purposes only**. Please:
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- [Hemnet.se](https://www.hemnet.se) - Data source
-- [Flask](https://flask.palletsprojects.com/) - Web framework
-- [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) - HTML parsing
-- [Chart.js](https://www.chartjs.org/) - Data visualization
-- [PythonAnywhere](https://www.pythonanywhere.com/) - Hosting platform
-
----
-
-## 📞 Support
-
-If you have questions or need help:
-1. Check [DEPLOY_PYTHONANYWHERE.md](DEPLOY_PYTHONANYWHERE.md) for deployment issues
-2. Review `scraper.log` for error details
-3. Open an issue on GitHub
-4. Contact via email
-
----
-
-## 🔮 Future Enhancements
-
-- [ ] PostgreSQL database support
-- [ ] Historical data comparison
-- [ ] Email notifications on new listings
-- [ ] Price drop alerts
-- [ ] Multi-city support
-- [ ] RESTful API for third-party integrations
-- [ ] Docker containerization
-- [ ] Scheduled automatic scraping (cron jobs)
-
----
-
-<div align="center">
-
-**⭐ Star this repo if you find it useful!**
-
-Made with ❤️ using Python & Flask
-
-</div>
+- [Hemnet.se](https://www.hemnet.se) — Data source
+- [Flask](https://flask.palletsprojects.com/) — Web framework
+- [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/) — HTML parsing
+- [Chart.js](https://www.chartjs.org/) — Data visualization
+- [cloudscraper](https://github.com/VeNoMouS/cloudscraper) — Anti-bot bypass

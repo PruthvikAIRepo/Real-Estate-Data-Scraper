@@ -1,3 +1,5 @@
+import json
+import math
 import time
 import random
 import logging
@@ -24,11 +26,12 @@ logger = logging.getLogger(__name__)
 # Configuration
 BASE_URL = "https://www.hemnet.se"
 START_URL = "https://www.hemnet.se/bostader"
-MAX_PAGES = 51
+GRAPHQL_URL = "https://www.hemnet.se/graphql"
+MUNICIPALITIES_FILE = "municipalities.json"
 REQUEST_TIMEOUT = 30
 MIN_DELAY = 2
 MAX_DELAY = 4
-EXCEL_FILE = "hemnet_listings.xlsx"  # Single file for append mode
+EXCEL_FILE = "hemnet_listings.xlsx"
 
 # Export Fields
 EXPORT_FIELDS = [
@@ -124,6 +127,30 @@ def load_existing_data(filepath):
         logger.error(f"Error loading existing file: {e}")
         logger.warning("Starting fresh due to load error")
         return [], set()
+
+
+def get_live_count(location_id):
+    """
+    Fetch current listing count for a municipality via Hemnet GraphQL API.
+
+    Args:
+        location_id: Hemnet municipality ID string
+
+    Returns:
+        Integer total listing count, or None on failure
+    """
+    query = '{ searchForSaleListings(limit: 0, search: { locationIds: ["%s"] }) { total } }' % location_id
+    try:
+        response = scraper.post(
+            GRAPHQL_URL,
+            json={"query": query},
+            timeout=REQUEST_TIMEOUT
+        )
+        data = response.json()
+        return data["data"]["searchForSaleListings"]["total"]
+    except Exception as e:
+        logger.warning(f"GraphQL count failed for location {location_id}: {e}")
+        return None
 
 
 def extract_listings(html, existing_ids=None):
@@ -313,14 +340,12 @@ def save_to_excel(listings, filename=None):
         logger.warning("No listings to save")
         return None
 
-    # Use default filename if not provided (single file for append mode)
     if filename is None:
         filename = EXCEL_FILE
 
     filepath = Path(filename)
 
     try:
-        # Create workbook and worksheet
         wb = Workbook()
         ws = wb.active
         ws.title = "Hemnet Listings"
@@ -361,7 +386,6 @@ def save_to_excel(listings, filename=None):
         # Freeze header row
         ws.freeze_panes = "A2"
 
-        # Save the workbook
         wb.save(filepath)
         logger.info(f"Saved {len(listings)} listings to {filepath}")
         return filepath
@@ -395,112 +419,127 @@ def fetch_page(url):
         return None
 
 
-def scrape_hemnet(max_pages=MAX_PAGES, output_file=None):
+def scrape_hemnet(output_file=None):
     """
-    Main scraping function that orchestrates the entire process with append mode.
+    Main scraping function. Loops through all 290 Swedish municipalities,
+    fetches live listing counts, and scrapes every page per municipality.
 
     Args:
-        max_pages: Maximum number of pages to scrape
         output_file: Optional custom output filename
 
     Returns:
-        Tuple of (list of new listings, path to Excel file)
+        Tuple of (list of all new listings, path to Excel file)
     """
-    # Determine output file path
     filepath = Path(output_file) if output_file else Path(EXCEL_FILE)
+
+    # Load municipalities from JSON (static list, built once)
+    municipalities_path = Path(MUNICIPALITIES_FILE)
+    if not municipalities_path.exists():
+        logger.error(f"{MUNICIPALITIES_FILE} not found. Cannot run full scrape.")
+        raise FileNotFoundError(f"{MUNICIPALITIES_FILE} not found")
+
+    municipalities = json.loads(municipalities_path.read_text(encoding='utf-8'))
+    total_municipalities = len(municipalities)
+
+    logger.info(f"Loaded {total_municipalities} municipalities from {MUNICIPALITIES_FILE}")
+    print(f"Loaded {total_municipalities} municipalities. Starting full scrape...", flush=True)
 
     # Load existing data with O(1) ID lookup set
     existing_data, existing_ids = load_existing_data(filepath)
 
-    new_results = []
+    all_new_results = []
     total_new = 0
     total_duplicates = 0
-    page = 1
+    global_page = 0  # tracks overall page number for Flask progress
 
-    logger.info(f"Starting Hemnet scraper - Max pages: {max_pages}")
-    print(f"Starting Hemnet scraper - Max pages: {max_pages}", flush=True)
+    for m_idx, municipality in enumerate(municipalities):
+        loc_id = municipality["id"]
+        loc_name = municipality["name"]
 
-    while page <= max_pages:
-        url = f"{START_URL}?page={page}"
+        # Fetch live listing count for this municipality
+        total = get_live_count(loc_id)
+        if total is None:
+            logger.warning(f"Skipping {loc_name} — could not fetch count")
+            print(f"Municipality {m_idx + 1}/{total_municipalities}: {loc_name} — skipped (count fetch failed)", flush=True)
+            continue
 
-        # Fetch the page
-        html = fetch_page(url)
-        if html is None:
-            logger.error("Failed to fetch page, stopping")
-            break
+        if total == 0:
+            logger.info(f"Skipping {loc_name} — 0 listings")
+            continue
 
-        # Extract listings with deduplication (existing_ids is updated in-place)
-        listings, new_count, dup_count = extract_listings(html, existing_ids)
+        pages = math.ceil(total / 50)
+        logger.info(f"[{m_idx + 1}/{total_municipalities}] {loc_name}: {total} listings across {pages} pages")
+        print(f"Municipality {m_idx + 1}/{total_municipalities}: {loc_name} ({total} listings, {pages} pages)", flush=True)
 
-        if new_count == 0 and dup_count == 0:
-            logger.info("No listings found on page, stopping pagination")
-            break
+        for page in range(1, pages + 1):
+            global_page += 1
+            url = f"{START_URL}?location_ids[]={loc_id}&page={page}"
 
-        new_results.extend(listings)
-        total_new += new_count
-        total_duplicates += dup_count
+            html = fetch_page(url)
+            if html is None:
+                logger.error(f"Failed to fetch {loc_name} page {page}, skipping")
+                break
 
-        # Count by listing type for this page's new listings
-        bostad_count = sum(1 for l in listings if l['listing_type'] == 'Bostad')
-        project_count = sum(1 for l in listings if l['listing_type'] == 'New Construction (Nybyggnadsprojekt)')
+            listings, new_count, dup_count = extract_listings(html, existing_ids)
 
-        # Log to file
-        logger.info(f"Page {page}: New: {new_count}, Duplicates: {dup_count} "
-                   f"(Bostad: {bostad_count}, Nybyggnadsprojekt: {project_count})")
+            if new_count == 0 and dup_count == 0:
+                logger.info(f"No listings found on {loc_name} page {page}, stopping pagination")
+                break
 
-        # Print to stdout for Flask real-time progress (required for subprocess capture)
-        print(f"Page {page}: New: {new_count}, Duplicates: {dup_count}", flush=True)
+            all_new_results.extend(listings)
+            total_new += new_count
+            total_duplicates += dup_count
 
-        # Check if we should continue
-        if page < max_pages:
-            # Polite crawling - random delay between requests
-            sleep_time = random.uniform(MIN_DELAY, MAX_DELAY)
-            logger.info(f"Sleeping {sleep_time:.1f}s before next request")
-            time.sleep(sleep_time)
+            logger.info(f"  Page {page}/{pages}: New: {new_count}, Duplicates: {dup_count}")
+            # Keep "Page X:" format so Flask dashboard progress bar still works
+            print(f"Page {global_page}: New: {new_count}, Duplicates: {dup_count}", flush=True)
 
-        page += 1
+            if page < pages:
+                sleep_time = random.uniform(MIN_DELAY, MAX_DELAY)
+                logger.info(f"Sleeping {sleep_time:.1f}s")
+                time.sleep(sleep_time)
 
-    # Save combined results (existing + new) to Excel
-    output_path = None
-    if new_results:
-        all_listings = existing_data + new_results
-        output_path = save_to_excel(all_listings, str(filepath))
-    elif existing_data:
-        logger.info("No new listings to add, file unchanged")
-        output_path = filepath
+        # Checkpoint: save after every municipality so progress isn't lost on crash
+        if all_new_results:
+            all_listings = existing_data + all_new_results
+            save_to_excel(all_listings, str(filepath))
+            existing_data = existing_data + all_new_results
+            all_new_results = []
 
-    # Print summary
+            # Regenerate dashboard JSON so live count updates in UI
+            try:
+                from generate_dashboard_data import main as generate_dashboard
+                generate_dashboard()
+            except Exception as e:
+                logger.warning(f"Dashboard JSON update failed: {e}")
+
+        # Polite delay between municipalities
+        time.sleep(random.uniform(MIN_DELAY, MAX_DELAY))
+
+    # Final summary
+    output_path = filepath if filepath.exists() else None
+
     logger.info("=" * 50)
-    logger.info("Scraping complete!")
-    logger.info(f"Existing listings in file: {len(existing_data)}")
-    logger.info(f"New listings added: {total_new}")
-    logger.info(f"Duplicates skipped: {total_duplicates}")
-
-    total_in_file = len(existing_data) + len(new_results)
-    total_bostad = sum(1 for l in (existing_data + new_results) if l.get('listing_type') == 'Bostad')
-    total_project = sum(1 for l in (existing_data + new_results) if l.get('listing_type') == 'New Construction (Nybyggnadsprojekt)')
-
-    logger.info(f"Total listings in file: {total_in_file}")
-    logger.info(f"  - Bostad: {total_bostad}")
-    logger.info(f"  - New Construction (Nybyggnadsprojekt): {total_project}")
+    logger.info("Full scrape complete!")
+    logger.info(f"Total new listings added: {total_new}")
+    logger.info(f"Total duplicates skipped: {total_duplicates}")
+    logger.info(f"Total listings in file: {len(existing_data)}")
     if output_path:
         logger.info(f"Data saved to: {output_path}")
 
-    # Print to stdout for Flask subprocess capture
     print("=" * 50, flush=True)
     print("Scraping complete!", flush=True)
     print(f"New listings added: {total_new}", flush=True)
-    print(f"Total listings in file: {total_in_file}", flush=True)
+    print(f"Total listings in file: {len(existing_data)}", flush=True)
 
-    return new_results, output_path
+    return all_new_results, output_path
 
 
 def main():
     """Entry point for the scraper."""
     try:
-        new_listings, output_path = scrape_hemnet(max_pages=MAX_PAGES)
+        new_listings, output_path = scrape_hemnet()
 
-        # Print sample of new record if any
         if new_listings:
             logger.info("\nSample new record:")
             sample = new_listings[0]

@@ -1691,6 +1691,24 @@
         // Auto-refresh every 5 minutes
         setInterval(loadData, 300000);
 
+        // On page load, check if scraper is already running (e.g. after a page refresh)
+        async function checkIfAlreadyRunning() {
+            try {
+                const response = await fetch('/api/scraper-status');
+                const status = await response.json();
+                if (status.running) {
+                    const btn = document.querySelector('button[onclick="runScraper()"]');
+                    btn.innerHTML = '<i class="fas fa-cog fa-spin"></i> Resuming...';
+                    btn.disabled = true;
+                    startStatusCheck();
+                }
+            } catch (error) {
+                console.error('Error checking initial scraper status:', error);
+            }
+        }
+
+        checkIfAlreadyRunning();
+
         // Scraper API Functions
         let statusCheckInterval = null;
 
@@ -1742,8 +1760,8 @@
 
                     if (status.running) {
                         const progress = status.progress || 0;
-                        const total = status.total_pages || 51;
-                        btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Page ${progress}/${total}`;
+                        const municipality = status.current_municipality ? ` — ${status.current_municipality}` : '';
+                        btn.innerHTML = `<i class="fas fa-cog fa-spin"></i> Page ${progress}${municipality}`;
                     } else {
                         // Scraper finished
                         clearInterval(statusCheckInterval);

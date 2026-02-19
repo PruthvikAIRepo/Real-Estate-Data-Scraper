@@ -1,683 +1,835 @@
 {
-  "generated_at": "2026-02-17T04:29:01.885117",
+  "generated_at": "2026-02-20T03:21:05.135967",
   "key_metrics": {
-    "total_listings": 2760,
-    "avg_price": 2902674,
-    "median_price": 2200000,
-    "min_price": 65000,
-    "max_price": 44950000,
-    "avg_area": 92.5,
-    "avg_price_per_m2": 72466,
-    "listings_with_price": 2743,
-    "listings_with_area": 2720
+    "total_listings": 33963,
+    "avg_price": 2745532,
+    "median_price": 1995000,
+    "min_price": 1,
+    "max_price": 78000000,
+    "avg_area": 99.0,
+    "avg_price_per_m2": 100728,
+    "listings_with_price": 33704,
+    "listings_with_area": 33217
   },
   "property_types": [
     {
       "name": "Lägenhet",
-      "count": 1781,
-      "percentage": 64.5,
-      "avg_price": 2383800,
-      "avg_area": 63.7,
-      "avg_price_m2": 39072
+      "count": 18574,
+      "percentage": 54.7,
+      "avg_price": 2218016,
+      "avg_area": 64.5,
+      "avg_price_m2": 35512
     },
     {
       "name": "Villa",
-      "count": 509,
-      "percentage": 18.4,
-      "avg_price": 4144020,
-      "avg_area": 143.5,
-      "avg_price_m2": 34625
-    },
-    {
-      "name": "Radhus",
-      "count": 208,
-      "percentage": 7.5,
-      "avg_price": 3822264,
-      "avg_area": 118.2,
-      "avg_price_m2": 38082
+      "count": 7643,
+      "percentage": 22.5,
+      "avg_price": 3846063,
+      "avg_area": 142.7,
+      "avg_price_m2": 34163
     },
     {
       "name": "Tomt",
-      "count": 101,
-      "percentage": 3.7,
-      "avg_price": 2005740,
-      "avg_area": 256.0,
-      "avg_price_m2": 875814
+      "count": 2611,
+      "percentage": 7.7,
+      "avg_price": 1379999,
+      "avg_area": 175.3,
+      "avg_price_m2": 775252
+    },
+    {
+      "name": "Radhus",
+      "count": 2329,
+      "percentage": 6.9,
+      "avg_price": 3598902,
+      "avg_area": 116.1,
+      "avg_price_m2": 32557
     },
     {
       "name": "Fritidshus",
-      "count": 88,
-      "percentage": 3.2,
-      "avg_price": 3828523,
-      "avg_area": 89.6,
-      "avg_price_m2": 43102
+      "count": 1436,
+      "percentage": 4.2,
+      "avg_price": 2468329,
+      "avg_area": 73.7,
+      "avg_price_m2": 40512
     },
     {
       "name": "Övrigt",
-      "count": 44,
-      "percentage": 1.6,
-      "avg_price": 2791886,
-      "avg_area": 214.6,
-      "avg_price_m2": 677975
+      "count": 780,
+      "percentage": 2.3,
+      "avg_price": 4378306,
+      "avg_area": 281.7,
+      "avg_price_m2": 602024
     },
     {
       "name": "Gård/Skog",
-      "count": 29,
-      "percentage": 1.1,
-      "avg_price": 6989444,
-      "avg_area": 190.7,
-      "avg_price_m2": 38396
+      "count": 590,
+      "percentage": 1.7,
+      "avg_price": 6526359,
+      "avg_area": 182.9,
+      "avg_price_m2": 223271
     }
   ],
   "locations": [
     {
-      "name": "Råsunda, Solna kommun",
-      "count": 14,
-      "avg_price": 2733462
-    },
-    {
-      "name": "Södertälje, Södertälje kommun",
-      "count": 14,
-      "avg_price": 1645714
-    },
-    {
-      "name": "Södermalm, Stockholms kommun",
-      "count": 10,
-      "avg_price": 5916000
+      "name": "Jakobsberg, Järfälla kommun",
+      "count": 122,
+      "avg_price": 2088402
     },
     {
       "name": "Kallhäll, Järfälla kommun",
-      "count": 10,
-      "avg_price": 1852000
+      "count": 102,
+      "avg_price": 2116010
     },
     {
-      "name": "Kungsholmen, Stockholms kommun",
-      "count": 10,
-      "avg_price": 5298000
+      "name": "Kista, Stockholms kommun",
+      "count": 96,
+      "avg_price": 2153417
     },
     {
-      "name": "Centrala Södertälje, Södertälje kommun",
-      "count": 9,
-      "avg_price": 1430000
+      "name": "Vega, Haninge kommun",
+      "count": 93,
+      "avg_price": 2785591
     },
     {
-      "name": "Vasastan, Stockholms kommun",
-      "count": 9,
-      "avg_price": 7547778
+      "name": "Södertälje, Södertälje kommun",
+      "count": 90,
+      "avg_price": 2038756
     },
     {
-      "name": "Salem, Salems kommun",
-      "count": 9,
-      "avg_price": 2556667
+      "name": "Barkarbystaden, Järfälla kommun",
+      "count": 80,
+      "avg_price": 2486562
     },
     {
-      "name": "Östermalm, Stockholms kommun",
-      "count": 9,
-      "avg_price": 10746667
-    },
-    {
-      "name": "Centrala Hisingen, Göteborgs kommun",
-      "count": 9,
-      "avg_price": 1937222
-    },
-    {
-      "name": "Centrala Huddinge, Huddinge kommun",
-      "count": 8,
-      "avg_price": 2543125
-    },
-    {
-      "name": "Fålhagen, Uppsala kommun",
-      "count": 8,
-      "avg_price": 2433125
-    },
-    {
-      "name": "Sörbyängen, Örebro kommun",
-      "count": 8,
-      "avg_price": 1869375
-    },
-    {
-      "name": "Söderkulla, Malmö kommun",
-      "count": 8,
-      "avg_price": 1764375
+      "name": "Avesta, Avesta kommun",
+      "count": 76,
+      "avg_price": 684395
     },
     {
       "name": "Hagalund, Borlänge kommun",
-      "count": 8,
-      "avg_price": 1321250
+      "count": 76,
+      "avg_price": 1240842
+    },
+    {
+      "name": "Centrala Väsby, Upplands Väsby kommun",
+      "count": 76,
+      "avg_price": 2027105
+    },
+    {
+      "name": "Söderhamn, Söderhamns kommun",
+      "count": 76,
+      "avg_price": 1616303
+    },
+    {
+      "name": "Åre By, Åre kommun",
+      "count": 74,
+      "avg_price": 4426292
+    },
+    {
+      "name": "Kungsberget, Sandvikens kommun",
+      "count": 73,
+      "avg_price": 1561658
+    },
+    {
+      "name": "Farsta, Stockholms kommun",
+      "count": 73,
+      "avg_price": 2797623
+    },
+    {
+      "name": "Örebro, Örebro kommun",
+      "count": 71,
+      "avg_price": 2720143
+    },
+    {
+      "name": "Centralt, Norrköpings kommun",
+      "count": 70,
+      "avg_price": 2082771
     }
   ],
   "brokers": [
     {
       "name": "Erik Olsson Fastighetsförmedling",
-      "count": 121,
-      "market_share": 4.4
+      "count": 1316,
+      "market_share": 3.9
     },
     {
       "name": "Notar",
-      "count": 93,
-      "market_share": 3.4
-    },
-    {
-      "name": "Fastighetsbyrån Södertälje",
-      "count": 33,
-      "market_share": 1.2
+      "count": 1036,
+      "market_share": 3.1
     },
     {
       "name": "Croisette Fastighetsförmedling",
-      "count": 31,
-      "market_share": 1.1
-    },
-    {
-      "name": "SkandiaMäklarna Eskilstuna",
-      "count": 25,
+      "count": 318,
       "market_share": 0.9
     },
     {
-      "name": "SkandiaMäklarna Norrköping",
-      "count": 20,
+      "name": "Fastighetsbyrån Södertälje",
+      "count": 242,
       "market_share": 0.7
     },
     {
-      "name": "Fastighetsbyrån Malmö",
-      "count": 19,
-      "market_share": 0.7
-    },
-    {
-      "name": "Pia Andersson Fastighetsbyrå AB",
-      "count": 16,
+      "name": "Nordå Fastighetsmäklare",
+      "count": 210,
       "market_share": 0.6
     },
     {
-      "name": "LF Fastighetsförmedling Göteborg - Hisingen",
-      "count": 15,
+      "name": "Fastighetsbyrån Malmö",
+      "count": 186,
       "market_share": 0.5
     },
     {
-      "name": "Sälenmäklaren AB",
-      "count": 14,
+      "name": "Fastighetsbyrån Sandviken",
+      "count": 163,
       "market_share": 0.5
     },
     {
-      "name": "Fastighetsbyrån Helsingborg",
-      "count": 14,
+      "name": "Fastighetsbyrån Växjö",
+      "count": 157,
       "market_share": 0.5
     },
     {
-      "name": "Bonava Sverige AB",
-      "count": 14,
+      "name": "SkandiaMäklarna Norrköping",
+      "count": 155,
       "market_share": 0.5
     },
     {
-      "name": "Svensk Fastighetsförmedling Gävle",
-      "count": 13,
-      "market_share": 0.5
+      "name": "LF Fastighetsförmedling Växjö",
+      "count": 152,
+      "market_share": 0.4
     },
     {
-      "name": "LF Fastighetsförmedling Göteborg Nordost",
-      "count": 13,
-      "market_share": 0.5
+      "name": "Widerlöv Uppsala",
+      "count": 151,
+      "market_share": 0.4
     },
     {
-      "name": "HusmanHagberg Helsingborg",
-      "count": 13,
-      "market_share": 0.5
+      "name": "LF Fastighetsförmedling Malmö",
+      "count": 148,
+      "market_share": 0.4
+    },
+    {
+      "name": "Bjurfors Växjö",
+      "count": 146,
+      "market_share": 0.4
+    },
+    {
+      "name": "Notar by Pontuz Löfgren",
+      "count": 144,
+      "market_share": 0.4
+    },
+    {
+      "name": "Boporten",
+      "count": 141,
+      "market_share": 0.4
     }
   ],
   "listing_labels": [
     {
       "name": "Premium",
-      "count": 2377
+      "count": 20981
     },
     {
       "name": "Standard",
-      "count": 286
-    },
-    {
-      "name": "Max",
-      "count": 61
+      "count": 10222
     },
     {
       "name": "Plus",
-      "count": 36
+      "count": 2307
+    },
+    {
+      "name": "Max",
+      "count": 453
     }
   ],
   "rooms_distribution": [
     {
       "name": "1,5 rum",
-      "count": 63
+      "count": 517
+    },
+    {
+      "name": "1-2 rum",
+      "count": 10
     },
     {
       "name": "1-3 rum",
-      "count": 1
+      "count": 12
     },
     {
       "name": "1-4 rum",
-      "count": 7
+      "count": 50
     },
     {
       "name": "1-5 rum",
-      "count": 3
+      "count": 38
     },
     {
       "name": "1-6 rum",
-      "count": 1
-    },
-    {
-      "name": "10 rum",
       "count": 11
     },
     {
-      "name": "11 rum",
-      "count": 1
-    },
-    {
-      "name": "12 rum",
-      "count": 4
-    },
-    {
-      "name": "14 rum",
+      "name": "1-7 rum",
       "count": 2
     },
     {
+      "name": "10 rum",
+      "count": 129
+    },
+    {
+      "name": "11 rum",
+      "count": 43
+    },
+    {
+      "name": "12 rum",
+      "count": 47
+    },
+    {
+      "name": "13 rum",
+      "count": 25
+    },
+    {
+      "name": "14 rum",
+      "count": 25
+    },
+    {
+      "name": "15 rum",
+      "count": 14
+    },
+    {
+      "name": "16 rum",
+      "count": 8
+    },
+    {
       "name": "17 rum",
-      "count": 1
+      "count": 4
+    },
+    {
+      "name": "18 rum",
+      "count": 4
+    },
+    {
+      "name": "19 rum",
+      "count": 4
     },
     {
       "name": "1 rum",
-      "count": 298
+      "count": 3135
     },
     {
       "name": "2,5 rum",
-      "count": 19
+      "count": 171
+    },
+    {
+      "name": "2-3 rum",
+      "count": 16
     },
     {
       "name": "2-4 rum",
-      "count": 7
+      "count": 64
     },
     {
       "name": "2-5 rum",
-      "count": 1
+      "count": 34
     },
     {
       "name": "2-6 rum",
+      "count": 3
+    },
+    {
+      "name": "21 rum",
+      "count": 2
+    },
+    {
+      "name": "22 rum",
+      "count": 1
+    },
+    {
+      "name": "23 rum",
+      "count": 1
+    },
+    {
+      "name": "25 rum",
+      "count": 3
+    },
+    {
+      "name": "28 rum",
       "count": 1
     },
     {
       "name": "2 rum",
-      "count": 643
+      "count": 6904
     },
     {
       "name": "3,5 rum",
-      "count": 15
+      "count": 91
     },
     {
       "name": "3-4 rum",
-      "count": 2
+      "count": 23
+    },
+    {
+      "name": "3-5 rum",
+      "count": 10
     },
     {
       "name": "3-6 rum",
+      "count": 4
+    },
+    {
+      "name": "3-8 rum",
       "count": 1
     },
     {
+      "name": "30 rum",
+      "count": 2
+    },
+    {
       "name": "3 rum",
-      "count": 538
+      "count": 6241
     },
     {
       "name": "4,5 rum",
-      "count": 5
+      "count": 40
     },
     {
       "name": "4-5 rum",
+      "count": 15
+    },
+    {
+      "name": "4-6 rum",
+      "count": 3
+    },
+    {
+      "name": "4-7 rum",
+      "count": 1
+    },
+    {
+      "name": "45 rum",
       "count": 1
     },
     {
       "name": "4 rum",
-      "count": 389
+      "count": 4788
     },
     {
       "name": "5,5 rum",
-      "count": 3
+      "count": 12
     },
     {
       "name": "5-6 rum",
+      "count": 14
+    },
+    {
+      "name": "5-7 rum",
+      "count": 1
+    },
+    {
+      "name": "5-8 rum",
+      "count": 1
+    },
+    {
+      "name": "58 rum",
       "count": 1
     },
     {
       "name": "5 rum",
-      "count": 289
+      "count": 3693
+    },
+    {
+      "name": "6-7 rum",
+      "count": 1
     },
     {
       "name": "6 rum",
-      "count": 161
+      "count": 2070
+    },
+    {
+      "name": "7,5 rum",
+      "count": 2
     },
     {
       "name": "7 rum",
-      "count": 63
+      "count": 936
     },
     {
       "name": "8 rum",
-      "count": 31
+      "count": 423
     },
     {
       "name": "9 rum",
-      "count": 12
+      "count": 158
+    },
+    {
+      "name": "vån -1",
+      "count": 1
+    },
+    {
+      "name": "vån 0/3",
+      "count": 1
+    },
+    {
+      "name": "vån 1",
+      "count": 2
+    },
+    {
+      "name": "vån 1/1",
+      "count": 1
+    },
+    {
+      "name": "vån 1/2",
+      "count": 4
+    },
+    {
+      "name": "vån 1/3",
+      "count": 2
+    },
+    {
+      "name": "vån 1/7",
+      "count": 1
     },
     {
       "name": "vån 2/4",
+      "count": 2
+    },
+    {
+      "name": "vån 2/5",
+      "count": 1
+    },
+    {
+      "name": "vån 3",
+      "count": 1
+    },
+    {
+      "name": "vån 3/3",
+      "count": 1
+    },
+    {
+      "name": "vån 3/6",
       "count": 1
     }
   ],
   "price_distribution": [
     {
       "range": "< 1M",
-      "count": 372
+      "count": 6850
     },
     {
       "range": "1-2M",
-      "count": 885
+      "count": 10711
     },
     {
       "range": "2-3M",
-      "count": 634
+      "count": 6672
     },
     {
       "range": "3-4M",
-      "count": 334
+      "count": 3639
     },
     {
       "range": "4-5M",
-      "count": 194
+      "count": 2037
     },
     {
       "range": "5-7.5M",
-      "count": 194
+      "count": 2239
     },
     {
       "range": "7.5-10M",
-      "count": 75
+      "count": 840
     },
     {
       "range": "> 10M",
-      "count": 55
+      "count": 716
     }
   ],
   "features": [
     {
       "name": "Balkong",
-      "count": 1148,
-      "percentage": 41.6
+      "count": 11731,
+      "percentage": 34.5
     },
     {
       "name": "Hiss",
-      "count": 872,
-      "percentage": 31.6
+      "count": 8720,
+      "percentage": 25.7
     },
     {
       "name": "Uteplats",
-      "count": 483,
+      "count": 5958,
       "percentage": 17.5
     },
     {
       "name": "Energieffektiv",
-      "count": 180,
-      "percentage": 6.5
+      "count": 1926,
+      "percentage": 5.7
     },
     {
       "name": "Nyproduktion",
-      "count": 147,
-      "percentage": 5.3
+      "count": 1679,
+      "percentage": 4.9
     },
     {
       "name": "Nybyggnadsprojekt",
-      "count": 42,
-      "percentage": 1.5
-    },
-    {
-      "name": "Exekutiv auktion",
-      "count": 39,
-      "percentage": 1.4
+      "count": 560,
+      "percentage": 1.6
     },
     {
       "name": "Inflyttningsklar",
-      "count": 16,
-      "percentage": 0.6
-    },
-    {
-      "name": "Ägarlägenhet",
-      "count": 10,
+      "count": 144,
       "percentage": 0.4
     },
     {
-      "name": "Vintern -27/28",
-      "count": 6,
-      "percentage": 0.2
+      "name": "Exekutiv auktion",
+      "count": 137,
+      "percentage": 0.4
+    },
+    {
+      "name": "Ägarlägenhet",
+      "count": 95,
+      "percentage": 0.3
     },
     {
       "name": "Hösten 2026",
-      "count": 5,
+      "count": 66,
       "percentage": 0.2
     },
     {
-      "name": "Vintern -26/27",
-      "count": 3,
+      "name": "Erbjudande",
+      "count": 39,
+      "percentage": 0.1
+    },
+    {
+      "name": "Hösten 2027",
+      "count": 38,
       "percentage": 0.1
     }
   ],
   "listing_types": [
     {
       "name": "Bostad",
-      "count": 2718
+      "count": 33403
     },
     {
       "name": "New Construction (Nybyggnadsprojekt)",
-      "count": 42
+      "count": 560
     }
   ],
   "insights": [
     {
       "category": "Market Overview",
       "title": "Total Market Size",
-      "text": "Currently tracking 2760 active listings with a combined market value of approximately 8.0 billion kr.",
+      "text": "Currently tracking 33963 active listings with a combined market value of approximately 93.2 billion kr.",
       "icon": "chart-line"
     },
     {
       "category": "Property Mix",
       "title": "Dominant Property Type",
-      "text": "Lägenhet dominates the market with 1781 listings (64.5%), averaging 2,383,800 kr.",
+      "text": "Lägenhet dominates the market with 18574 listings (54.7%), averaging 2,218,016 kr.",
       "icon": "home"
     },
     {
       "category": "Price Analysis",
       "title": "Price Skew Detected",
-      "text": "Average price (2,902,674 kr) is 32% higher than median (2,200,000 kr), indicating presence of high-value luxury properties pulling up the average.",
+      "text": "Average price (2,745,532 kr) is 38% higher than median (1,995,000 kr), indicating presence of high-value luxury properties pulling up the average.",
       "icon": "trending-up"
     },
     {
       "category": "Location Trends",
       "title": "Hottest Area",
-      "text": "Råsunda, Solna kommun leads with 14 listings at average price of 2,733,462 kr.",
+      "text": "Jakobsberg, Järfälla kommun leads with 122 listings at average price of 2,088,402 kr.",
       "icon": "map-pin"
     },
     {
       "category": "Broker Analysis",
       "title": "Market Leader",
-      "text": "Erik Olsson Fastighetsförmedling holds the largest market share at 4.4% with 121 active listings.",
+      "text": "Erik Olsson Fastighetsförmedling holds the largest market share at 3.9% with 1316 active listings.",
       "icon": "briefcase"
     },
     {
       "category": "Features",
       "title": "Most Desired Feature",
-      "text": "Balkong is the most common feature, present in 41.6% of all listings.",
+      "text": "Balkong is the most common feature, present in 34.5% of all listings.",
       "icon": "star"
     },
     {
       "category": "Value Analysis",
       "title": "Highest Price per m²",
-      "text": "Tomt has the highest price density at 875,814 kr/m², making it the most premium property category.",
+      "text": "Tomt has the highest price density at 775,252 kr/m², making it the most premium property category.",
       "icon": "dollar-sign"
     },
     {
       "category": "Listing Quality",
       "title": "Premium Presence",
-      "text": "2377 listings (86%) are marked as Premium, indicating sellers investing in higher visibility.",
+      "text": "20981 listings (62%) are marked as Premium, indicating sellers investing in higher visibility.",
       "icon": "award"
     }
   ],
   "recent_listings": [
     {
-      "id": "21550262",
-      "title": "Ottsjövägen 7",
-      "location": "Årsta, Stockholms kommun",
-      "price": "2 750 000 kr",
-      "area": "41 m²",
-      "rooms": "2 rum",
-      "property_type": "Lägenhet",
-      "listing_label": "Premium"
-    },
-    {
-      "id": "21641846",
-      "title": "Tomtebogatan 34 C, 1tr",
-      "location": "Vasastan - Birkastan, Stockholms kommun",
-      "price": "11 995 000 kr",
-      "area": "106 m²",
-      "rooms": "4 rum",
-      "property_type": "Lägenhet",
-      "listing_label": "Premium"
-    },
-    {
-      "id": "21675369",
-      "title": "Färgargårdstorget 20",
-      "location": "Södermalm, Stockholms kommun",
-      "price": "4 995 000 kr",
-      "area": "57 m²",
-      "rooms": "2 rum",
-      "property_type": "Lägenhet",
+      "id": "19800217",
+      "title": "Gummark 1:66",
+      "location": "Gummark, Skellefteå kommun",
+      "price": "250 000 kr",
+      "area": "2 500 m²",
+      "rooms": "",
+      "property_type": "Tomt",
       "listing_label": "Standard"
     },
     {
-      "id": "21515290",
-      "title": "Ljusdalsgatan 27",
-      "location": "Vällingby Parkstad / Råcksta, Stockholms kommun",
-      "price": "4 850 000 kr",
-      "area": "122 m²",
-      "rooms": "5 rum",
-      "property_type": "Radhus",
-      "listing_label": "Max"
+      "id": "19774615",
+      "title": "Lagergatan 34",
+      "location": "Hedensbyn, Skellefteå kommun",
+      "price": "1 395 000 kr",
+      "area": "73 m²",
+      "rooms": "",
+      "property_type": "Övrigt",
+      "listing_label": "Standard"
     },
     {
-      "id": "21643231",
-      "title": "Bäckelid 2",
-      "location": "Högsäter, Färgelanda kommun",
-      "price": "1 550 000 kr",
-      "area": "153+72 m²",
-      "rooms": "6 rum",
-      "property_type": "Villa",
-      "listing_label": "Premium"
+      "id": "19161355",
+      "title": "Södra Kustvägen Tomt i Bureå",
+      "location": "Bureå, Skellefteå kommun",
+      "price": "1 900 000 kr",
+      "area": "1,7 ha",
+      "rooms": "",
+      "property_type": "Tomt",
+      "listing_label": "Standard"
     },
     {
-      "id": "21597051",
-      "title": "Petrus väg 16",
-      "location": "Barsebäck by, Kävlinge kommun",
-      "price": "3 250 000 kr",
-      "area": "120 m²",
-      "rooms": "5 rum",
-      "property_type": "Radhus",
-      "listing_label": "Premium"
+      "id": "18839018",
+      "title": "INNERVIK 6:28",
+      "location": "Södra Bergsbyn, Skellefteå kommun",
+      "price": "650 000 kr",
+      "area": "2 398 m²",
+      "rooms": "",
+      "property_type": "Tomt",
+      "listing_label": "Standard"
     },
     {
-      "id": "21668246",
-      "title": "TRÄDGÅRDSVÄGEN 40",
-      "location": "Lindholmen, Vallentuna kommun",
-      "price": "5 795 000 kr",
-      "area": "115+115 m²",
-      "rooms": "6 rum",
-      "property_type": "Villa",
-      "listing_label": "Premium"
+      "id": "18751598",
+      "title": "Söderbodan 174",
+      "location": "Ostvik, Skellefteå kommun",
+      "price": "725 000 kr",
+      "area": "1 730 m²",
+      "rooms": "",
+      "property_type": "Tomt",
+      "listing_label": "Standard"
     },
     {
-      "id": "21675390",
-      "title": "Årupsvägen 125",
-      "location": "Asmundtorp/Billeberga, Landskrona kommun",
-      "price": "2 995 000 kr",
-      "area": "105+40 m²",
-      "rooms": "4 rum",
-      "property_type": "Villa",
-      "listing_label": "Premium"
+      "id": "16162460",
+      "title": "Bastuholmen 42",
+      "location": "Kåge, Skellefteå kommun",
+      "price": "690 000 kr",
+      "area": "",
+      "rooms": "",
+      "property_type": "Fritidshus",
+      "listing_label": "Standard"
     },
     {
-      "id": "21675356",
-      "title": "Terrängvägen 1A",
-      "location": "Berghem, Umeå kommun",
-      "price": "2 175 000 kr",
-      "area": "70,5 m²",
+      "id": "16162311",
+      "title": "Bastuholmen",
+      "location": "Kåge, Skellefteå kommun",
+      "price": "690 000 kr",
+      "area": "",
+      "rooms": "",
+      "property_type": "Fritidshus",
+      "listing_label": "Standard"
+    },
+    {
+      "id": "13879037",
+      "title": "Boviksbadet",
+      "location": "BOVIKSBADET - Tomt, Skellefteå kommun",
+      "price": "795 000 kr",
+      "area": "1 760 m²",
+      "rooms": "",
+      "property_type": "Tomt",
+      "listing_label": "Standard"
+    },
+    {
+      "id": "21587343",
+      "title": "Rengård 10",
+      "location": "Boliden, Norsjö kommun",
+      "price": "550 000 kr",
+      "area": "82+32 m²",
       "rooms": "3 rum",
-      "property_type": "Lägenhet",
-      "listing_label": "Premium"
+      "property_type": "Villa",
+      "listing_label": "Standard"
     },
     {
-      "id": "21436391",
-      "title": "Engelbrektsgatan 18A",
-      "location": "Västermalm, Eskilstuna kommun",
-      "price": "1 050 000 kr",
-      "area": "58 m²",
-      "rooms": "2 rum",
-      "property_type": "Lägenhet",
+      "id": "21438664",
+      "title": "Grimsmark 20",
+      "location": "Ånäset, Robertsfors kommun",
+      "price": "795 000 kr",
+      "area": "115+40 m²",
+      "rooms": "3 rum",
+      "property_type": "Gård/Skog",
       "listing_label": "Premium"
     }
   ],
   "time_series": {
     "dates": [
       "2026-01-23",
-      "2026-02-17"
+      "2026-02-17",
+      "2026-02-20"
     ],
     "total_listings": [
       250,
-      2510
+      2510,
+      31203
     ],
     "listing_types": {
       "Bostad": [
         250,
-        2468
+        2468,
+        30685
       ],
       "New Construction": [
         0,
-        42
+        42,
+        518
       ]
     },
     "listing_labels": {
       "Premium": [
         187,
-        2190
+        2190,
+        18604
       ],
       "Plus": [
         8,
-        28
+        28,
+        2271
       ],
       "Max": [
         6,
-        55
+        55,
+        392
       ],
       "Standard": [
         49,
-        237
+        237,
+        9936
       ]
     },
     "listing_labels_pct": {
       "Premium": [
         74.8,
-        87.3
+        87.3,
+        59.6
       ],
       "Plus": [
         3.2,
-        1.1
+        1.1,
+        7.3
       ],
       "Max": [
         2.4,
-        2.2
+        2.2,
+        1.3
       ],
       "Standard": [
         19.6,
-        9.4
+        9.4,
+        31.8
       ]
     }
   }
